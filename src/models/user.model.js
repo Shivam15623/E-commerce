@@ -9,7 +9,7 @@ const useschema=new Schema(
             type:String,
             required:true,
             unique:true,
-            lowecase:true,
+            lowercase:true,
             trim:true,
             index:true
         },
@@ -17,7 +17,7 @@ const useschema=new Schema(
             type:String,
             required:true,
             unique:true,
-            lowecase:true,
+            lowercase:true,
             trim:true
         },
         fullname:{
@@ -55,8 +55,7 @@ const useschema=new Schema(
         password:{
             type:String,
             required:true,
-            unique:true,
-            lowecase:true,
+            lowercase:true,
             trim:true
         },
         orders: [{
