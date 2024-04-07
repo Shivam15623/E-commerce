@@ -16,7 +16,16 @@ cloudinary.config({
         const response=await cloudinary.uploader.upload(localfilepath,{
             resource_type:'auto'
         })
-        console.log("file is uploaded on cloudinary!!",response.url)
+        // console.log("file is uploaded on cloudinary!!",response.url)
+        
+        setTimeout(() => {
+            try {
+                fs.unlinkSync(localfilepath);
+                console.log(`Local file ${localfilepath} deleted after upload to Cloudinary.`);
+            } catch (error) {
+                console.error(`Error deleting local file ${localfilepath}:`, error);
+            }
+        }, 5000);
         return response;
     } catch (error) {
         fs.unlinkSync(localfilepath)
