@@ -59,7 +59,6 @@ const useschema=new Schema(
         password:{
             type:String,
             required:true,
-            lowercase:true,
             trim:true
         },
         orders: [{
@@ -81,7 +80,8 @@ useschema.pre("save",async function(next){
     if(!this.isModified("password")){
         return next()
     }else{
-        this.password=await bcrypt.hash(this.password,10)
+        const salt=await bcrypt.genSalt(10)
+        this.password=await bcrypt.hash(this.password,salt)
         next()
     }
 })

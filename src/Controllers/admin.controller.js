@@ -55,8 +55,9 @@ const registeradmin=asyncHandler(async(req,res)=>{
 const loginadmin=asyncHandler(async(req,res)=>{
     //get data from frontend
     const {adminname,email,password}=req.body;
+    console.log("admin",password)
     //validate
-    if(!adminname||!email){
+    if(!adminname && !email){
         throw new ApiErrors(400,"adminname or Email is required")
     }
     //find admin
@@ -68,23 +69,37 @@ const loginadmin=asyncHandler(async(req,res)=>{
     }
     //check passwords
     const validatepassword=await admin.isPasswordCorrect(password)
+    console.log("password",validatepassword)
     if(!validatepassword){
         throw new ApiErrors(400,"Wrong Password")
     }
     //generate Access and refreshtoken
     const {AdminAccesstoken,AdminRefreshtoken}=await GenerateAccessAndRefreshTokenAdmin(admin._id)
-    const loggedinAdmin=Admin.findById(admin._id).select("-password -refreshToken")
+    const loggedinAdmin = await Admin.findById(admin._id).select("-password -refreshToken");
     const options={
-        httpsOnly:true,
+        httpOnly:true,
         secure:true
     }
-    return res.status(200).cookie("accessToken",AdminAccesstoken,options).cookie("refreshToken",AdminRefreshtoken,options).json(new Apiresponse(200,{admin:loggedinAdmin,AdminAccesstoken,AdminRefreshtoken},"Admin Logged in Successfully"))
-
+    return res
+    .status(200)
+    .cookie("accessToken", AdminAccesstoken, options)
+    .cookie("refreshToken", AdminRefreshtoken, options)
+    .json(
+        new Apiresponse(
+            200, 
+            {
+                admin:loggedinAdmin,AdminAccesstoken,AdminRefreshtoken
+            },
+            "User logged In Successfully"
+        )
+    )
 
 })
 const logoutadmin=asyncHandler(async(req,res)=>{
     Admin.findByIdAndUpdate(req.admin._id,{
-        $set:refreshToken
+        $unset: {
+            refreshToken: 1 // this removes the field from document
+        }
     },{
         new:true
     })
@@ -92,6 +107,6 @@ const logoutadmin=asyncHandler(async(req,res)=>{
         httpOnly:true,
         secure:true
     }
-    return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options)
+    return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(new Apiresponse(200, {}, "User logged Out"))
 })
 export {registeradmin,loginadmin,logoutadmin}
