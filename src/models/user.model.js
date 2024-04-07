@@ -30,6 +30,10 @@ const useschema=new Schema(
             type:String,
             required:true //Cloudinary
         },
+        phoneno:{
+            type:Number,
+            required:true
+        },
         address: {
             street: {
                 type:String,
@@ -77,7 +81,7 @@ useschema.pre("save",async function(next){
     if(!this.isModified("password")){
         return next()
     }else{
-        this.password=bcrypt.hash(this.password,10)
+        this.password=await bcrypt.hash(this.password,10)
         next()
     }
 })
@@ -90,7 +94,8 @@ useschema.methods.generateAccessToken=function(){
         _id:this._id,
         email:this.email,
         username:this.username,
-        fullname:this.fullname
+        fullname:this.fullname,
+        phoneno:this.phoneno
     },process.env.ACCESS_TOKEN_SECRET,{
         expiresIn:process.env.ACCESS_TOKEN_EXPIRY
     }
