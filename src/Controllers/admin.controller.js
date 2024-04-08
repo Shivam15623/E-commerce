@@ -109,4 +109,60 @@ const logoutadmin=asyncHandler(async(req,res)=>{
     }
     return res.status(200).clearCookie("accessToken",options).clearCookie("refreshToken",options).json(new Apiresponse(200, {}, "User logged Out"))
 })
-export {registeradmin,loginadmin,logoutadmin}
+const refreshAdminAccessToken=asyncHandler(async(req,res)=>{
+    const incomingAdminRefreshToken=req.cookies.refreshToken || req.body.refreshToken
+    if(!incomingAdminRefreshToken){
+        throw new ApiErrors(401,"unauthorized request")
+    }
+   try {
+     const decodedToken=jwt.verify(incomingAdminRefreshToken,process.env.REFRESH_TOKEN_SECRET)
+     const admin=await Admin.findById(decodedToken?._id);
+     if(!admin){
+         throw new ApiErrors(400,"invalid token")
+     }
+     if(incomingAdminRefreshToken!==admin?.refreshToken){
+         throw new ApiErrors(400,"refreshtoken expired or used")
+     }
+     const options={
+         httpOnly:true,
+         secure:true
+     }
+     const {AdminAccesstoken,newAdminRefreshToken}=await GenerateAccessAndRefreshTokenAdmin(admin._id)
+     return res.status(200).cookie("accessToken",AdminAccesstoken,options).cookie("refreshToken",newAdminRefreshToken,options).json(200,{AdminAccesstoken,refreshToken:newAdminRefreshToken},"Access Token Refreshed")
+   } catch (error) {
+        throw new ApiErrors(401,error?.message)
+   }
+
+})
+
+const changeAdminpassword=asyncHandler(async(req,res)=>{
+    const {oldpassword,newpassword}=req.body;
+    const admin= await User.findById(req.admin._id);
+    const passwordvalid=await admin.isPasswordCorrect(oldpassword);
+    if(!passwordvalid){
+        throw new ApiErrors(401,"Invalid old password")
+    }
+    admin.password=newpassword;
+    await admin.save({validateBeforeSave:false})
+    return res.status(200).json(new Apiresponse(200,{},"Password is changed Successfully"))
+
+})
+const getcurrentAdmin=asyncHandler(async(req,res)=>{
+    return res.status(200).json(new Apiresponse(200,req.admin,"Admin fetched successFully"))
+})
+const UpdateAdminDetails=asyncHandler(async(req,res)=>{
+    const {email,adminname}=req.body;
+    if(!adminname || !email){
+        throw new ApiErrors(400, "All fields are required")
+    }
+    const admin=await Admin.findByIdAndUpdate(req.admin._id,{
+        $set:{
+            email:email,
+            adminname:adminname
+        }
+    },{new:true}).select("-password")
+    return res
+    .status(200)
+    .json(new Apiresponse(200, admin, "Account details updated successfully"))
+})
+export {registeradmin,loginadmin,logoutadmin,refreshAdminAccessToken,changeAdminpassword,getcurrentAdmin,UpdateAdminDetails}

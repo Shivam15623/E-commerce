@@ -20,4 +20,5 @@ import adminrouter from "./Routes/admin.routes.js"
 //routes declaration
 app.use("/api/v1/users",userrouter)
 app.use("/api/v1/admin",adminrouter)
+
 export {app}
