@@ -24,15 +24,21 @@ const productSchema=new Schema({
         type:Number,
         required:true,
     },
+    charimg:{
+            type:String,
+            required:true
+    },
+    frontimg:{
+        type:String,
+        required:true
+    },
     images:{
-        charimg:{
-            type:String,
-            required:true
-        },
-        productimg:{
-            type:String,
-            required:true
-        }
+        type: [String],
+        required: true  // Making size field required
+    },
+    size: {
+        type: [String],
+        required: true  // Making size field required
     },
     animename:{
         type:String,
