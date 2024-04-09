@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { UpdateAdminDetails, changeAdminpassword, getcurrentAdmin, loginadmin, logoutadmin, refreshAdminAccessToken, registeradmin } from "../Controllers/admin.controller.js";
+import { UpdateAdminDetails, allordersAdmin, changeAdminpassword, getcurrentAdmin, loginadmin, logoutadmin, refreshAdminAccessToken, registeradmin } from "../Controllers/admin.controller.js";
 import { verifyAdminJWT } from "../Middlewares/AuthAdmin.middleware.js";
 
 const router=Router();
@@ -11,6 +11,7 @@ router.route("/logout").post(verifyAdminJWT,logoutadmin)
 router.route("/refreshtoken").post(refreshAdminAccessToken)
 router.route("/update-account").patch(verifyAdminJWT,UpdateAdminDetails)
 router.route("/changepassword").post(verifyAdminJWT,changeAdminpassword)
-router.route("/currentuser").post(verifyAdminJWT,getcurrentAdmin)
+router.route("/currentuser").get(verifyAdminJWT,getcurrentAdmin)
+router.route("/getallorders").get(verifyAdminJWT,allordersAdmin)
 
 export default router;

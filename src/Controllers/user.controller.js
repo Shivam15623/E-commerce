@@ -4,6 +4,7 @@ import {User} from "../models/user.model.js"
 import {uploadCloudinary} from "../utils/cloudinary.js"
 import { Apiresponse } from "../utils/Apiresponse.js";
 import jwt from "jsonwebtoken";
+import { Cart } from "../models/cart.model.js";
 
 const GenerateAccessAndRefreshToken=async(userId)=>{
     try {
@@ -56,6 +57,7 @@ const registerUser=asyncHandler(async(req,res)=>{
 
         throw new ApiErrors(409,"Avatar  is required")
     }
+    
     const user=await User.create({
         fullname,
         avatar:avatar.url,
@@ -69,6 +71,18 @@ const registerUser=asyncHandler(async(req,res)=>{
     )
     if(!createduser){
         throw new ApiErrors(500,"something went wrong while registering user")
+    }
+    const cart=await Cart.create({
+        userId:createduser._id,
+        username:createduser.username,
+        email:createduser.email,
+        products:[],
+        totalAmount:0,
+
+    })
+    const findcart=await Cart.findById(cart._id)
+    if(!findcart){
+        throw new ApiErrors(500,"Cart not created")
     }
     return res.status(201).json(
          new Apiresponse(200,createduser,"User Registered successfully")

@@ -2,6 +2,7 @@ import {asyncHandler} from "../utils/asynchandler.js"
 import {ApiErrors} from "../utils/ApiErrors.js";
 import { Admin } from "../models/admin.model.js";
 import { Apiresponse } from "../utils/Apiresponse.js";
+import { Order } from "../models/order.model.js";
 
 const GenerateAccessAndRefreshTokenAdmin=async(adminId)=>{
     try {
@@ -165,4 +166,25 @@ const UpdateAdminDetails=asyncHandler(async(req,res)=>{
     .status(200)
     .json(new Apiresponse(200, admin, "Account details updated successfully"))
 })
-export {registeradmin,loginadmin,logoutadmin,refreshAdminAccessToken,changeAdminpassword,getcurrentAdmin,UpdateAdminDetails}
+// get all Orders -- Admin
+const allordersAdmin=asyncHandler(async(req,res)=>{
+    if(!req.admin._id){
+        throw new ApiErrors(400,"This is only allowed to user")
+    }
+    const orders=await Order.find();
+    let totalAmount = 0;
+
+  orders.forEach((order) => {
+    totalAmount += order.totalAmount;
+  });
+    if(!orders ||orders.length===0){
+        return res.status(200).json(new Apiresponse(200,totalAmount,"There are no orders now ")) 
+    }
+    res.status(200).json(new Apiresponse(200,{totalAmount,orders},"All Orders Fetched Successfully ")) 
+    
+
+
+})
+// delete Order -- Admin
+
+export {registeradmin,loginadmin,logoutadmin,refreshAdminAccessToken,changeAdminpassword,getcurrentAdmin,UpdateAdminDetails,allordersAdmin}
